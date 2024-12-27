@@ -196,11 +196,12 @@ elif command -v rc-service > /dev/null; then
 
 description="AkileCloud Monitor Service"
 
-command=./client
+command=/etc/ak_monitor/client
 command_args=""
 pidfile=/run/ak_client.pid
 user=root
 group=root
+chdir=/etc/ak_monitor
 
 depend() {
     after net
@@ -210,9 +211,9 @@ start() {
     ebegin "Starting AkileCloud Monitor Service"
     
     # 手动切换到工作目录
-    cd /etc/ak_monitor || return 1
+    # cd /etc/ak_monitor || return 1
 
-    start-stop-daemon --start --quiet --background --make-pidfile --pidfile $pidfile --user $user --group $group --exec $command
+    start-stop-daemon --start --quiet --background --make-pidfile --pidfile $pidfile --user $user --group $group --chdir $chdir --exec $command
     eend $?
 }
 
