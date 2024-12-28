@@ -140,8 +140,15 @@ cd /etc/ak_monitor/
 wget -O client https://github.com/akile-network/akile_monitor/releases/latest/download/$CLIENT_FILE
 chmod 777 client
 
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$ID
+else
+    OS=$(uname -s)
+fi
+
 # Create systemd service file
-if command -v systemctl > /dev/null; then
+if command -v systemctl > /dev/null && { [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; }; then
 cat > /etc/systemd/system/ak_client.service << 'EOF'
 [Unit]
 Description=AkileCloud Monitor Service
@@ -187,7 +194,7 @@ systemctl start ak_client.service
 echo "Installation complete! Service status:"
 systemctl status ak_client.service
 
-elif command -v rc-service > /dev/null; then
+elif command -v rc-service > /dev/null && [ "$OS" = "alpine" ]; then
 # 系统为 Alpine (OpenRC)
     echo "Creating OpenRC service script..."
 
