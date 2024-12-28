@@ -196,30 +196,34 @@ elif command -v rc-service > /dev/null; then
 
 description="AkileCloud Monitor Service"
 
-command=/etc/ak_monitor/client
+command="/etc/ak_monitor/client"
 command_args=""
-pidfile=/run/ak_client.pid
-user=root
-group=root
-chdir=/etc/ak_monitor
+pidfile="/run/ak_client.pid"
+user="root"
+group="root"
+directory="/etc/ak_monitor"
 
 depend() {
     after net
 }
 
-start() {
-    ebegin "Starting AkileCloud Monitor Service"
-    
-    # 手动切换到工作目录
-    # cd /etc/ak_monitor || return 1
+supervisor=supervise-daemon
+output_log="/var/log/ak_monitor.log"
+error_log="/var/log/ak_monitor.err"
+respawn_delay=1
+respawn_max=0
 
-    start-stop-daemon --start --quiet --background --make-pidfile --pidfile $pidfile --user $user --group $group --chdir $chdir --exec $command
+start() {
+    export RC_SVCNAME="ak_client"
+    ebegin "Starting AkileCloud Monitor Service"
+    supervise-daemon $RC_SVCNAME --start --pidfile $pidfile --user $user --group $group --chdir $directory --stdout $output_log --stderr $error_log --respawn-delay $respawn_delay --respawn-max $respawn_max -- $command
     eend $?
 }
 
 stop() {
+    export RC_SVCNAME="ak_client"
     ebegin "Stopping AkileCloud Monitor Service"
-    start-stop-daemon --stop --quiet --pidfile $pidfile
+    supervise-daemon $RC_SVCNAME --stop --pidfile $pidfile
     eend $?
 }
 
